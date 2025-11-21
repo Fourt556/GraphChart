@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bar Chart System</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: #1e3a8a;
+            color: #ffffff;
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+        }
+
+        .chart-subtitle {
+            font-size: 16px;
+            color: #718096;
+            margin-top: 10px;
+        }
+
+        .subtitle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        
+        .subtitle-center {
+            text-align: center;
+        }
+        
+        .subtitle-right {
+            position: absolute;
+            right: 0;
+            top: 25px;
+        }
+
+        .input-section {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group select {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .category-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .category-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .category-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .category-controls input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-input-group input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .data-entry-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .data-entry-table thead {
+            background: #667eea;
+            color: white;
+        }
+
+        .data-entry-table th,
+        .data-entry-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .data-entry-table input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            position: relative;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #48bb78;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .status-arrow {
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .status-badge.arrow-up {
+            background: #48bb78;
+        }
+
+        .status-badge.arrow-down {
+            background: #f56565;
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 450px;
+            margin-top: 40px;
+        }
+
+        .chart-axes {
+            position: relative;
+            height: 100%;
+            border-left: 3px solid #2d3748;
+            border-bottom: 3px solid #2d3748;
+            padding: 20px 20px 40px 60px;
+        }
+
+        .y-axis-labels {
+            position: absolute;
+            left: 0;
+            top: 20px;
+            bottom: 40px;
+            width: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-right: 10px;
+        }
+
+        .y-axis-label {
+            font-size: 12px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .bars-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 100%;
+            gap: 20px;
+            position: relative;
+        }
+
+        .year-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        .bars-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            height: calc(100% - 30px);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .bar {
+            width: 50px;
+            background: linear-gradient(to top, var(--bar-color), var(--bar-color-light));
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .bar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: #2d3748;
+            white-space: nowrap;
+        }
+
+        .x-axis-label {
+            margin-top: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+            position: absolute;
+            bottom: 5px;
+            left: 60px;
+            right: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .target-line-dashed {
+            position: absolute;
+            left: 60px;
+            right: 20px;
+            height: 3px;
+            background: #ed8936;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .target-line-dashed::after {
+            content: 'เป้าหมาย';
+            position: absolute;
+            left: 0;
+            top: -25px;
+            background: #ed8936;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
+        }
+
+        .target-value-label {
+            position: absolute;
+            right: -50px;
+            top: -10px;
+            background: #ed8936;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
+        }
+
+        .save-button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-save {
+            background: #48bb78;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-save:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-canvas {
+                height: 300px;
+            }
+
+            .bar {
+                width: 35px;
+            }
+
+            .bars-wrapper {
+                gap: 5px;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+</head>
+<body>
+  <div class="container">
+   <div class="input-section">
+    <div class="input-grid">
+     <div class="input-group"><label>หัวข้อกราฟ</label> <input type="text" id="titleInput" placeholder="เช่น อัตราการมีงานทำของบัณฑิต">
+     </div>
+     <div class="input-group"><label>ตัวชี้วัด</label> <input type="text" id="indicatorInput" placeholder="เช่น ร้อยละของบัณฑิตที่มีงานทำ">
+     </div>
+     <div class="input-group"><label>เป้าหมาย</label> <input type="text" id="targetInput" placeholder="เช่น มากกว่าร้อยละ 75">
+     </div>
+     <div class="input-group"><label>สถานะการประเมินผล</label> <input type="text" id="statusInput" placeholder="เช่น Good, Very Good, Excellent">
+     </div>
+     <div class="input-group"><label>ทิศทางลูกศร</label> <select id="arrowDirection" onchange="updateArrowDirection()"> <option value="up">↑ ชี้ขึ้น (เพิ่มขึ้น)</option> <option value="down">↓ ชี้ลง (ลดลง)</option> </select>
+     </div>
+    </div>
+    <div class="category-section">
+     <div class="category-header">
+      หมวดหมู่ข้อมูล
+     </div>
+     <div id="categoriesContainer"></div><button class="btn btn-primary" onclick="addCategory()">+ เพิ่มหมวดหมู่</button>
+    </div>
+    <div class="category-section">
+     <div class="category-header">
+      ปีที่แสดง
+     </div>
+     <div class="category-controls"><input type="number" id="year1" value="2566" min="2500" max="2600"> <input type="number" id="year2" value="2567" min="2500" max="2600"> <input type="number" id="year3" value="2568" min="2500" max="2600">
+     </div>
+    </div>
+    <div class="category-section">
+     <div class="category-header">
+      กรอกข้อมูล
+     </div>
+     <div style="overflow-x: auto;">
+      <table class="data-entry-table" id="dataTable">
+       <thead>
+        <tr>
+         <th>หมวดหมู่</th>
+         <th id="yearHeader1">2566</th>
+         <th id="yearHeader2">2567</th>
+         <th id="yearHeader3">2568</th>
+        </tr>
+       </thead>
+       <tbody id="dataTableBody"></tbody>
+      </table>
+     </div>
+    </div>
+    <div class="category-section">
+     <div class="input-group"><label>ค่าเป้าหมาย (แสดงเป็นเส้นสีส้มบนกราฟ)</label> <input type="number" id="targetValue" placeholder="เช่น 75" step="0.1">
+     </div>
+    </div>
+   </div>
+   <div class="chart-container" id="chartContainer">
+    <div class="header">
+     <div class="chart-title" id="displayTitle">
+      กราฟแสดงข้อมูล
+     </div>
+     <div class="subtitle-wrapper">
+      <div class="chart-subtitle subtitle-center"><span id="displayIndicator">ตัวชี้วัด</span> | <span id="displayTarget">เป้าหมาย</span>
+      </div>
+      <div class="subtitle-right">
+       <div class="status-badge" id="statusBadge">
+        Good
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="chart-canvas">
+     <div class="chart-axes">
+      <div class="y-axis-labels" id="yAxisLabels"></div>
+      <div id="targetLineContainer"></div>
+      <div class="bars-container" id="barsContainer"></div>
+     </div>
+    </div>
+    <div class="legend" id="legend"></div>
+   </div>
+   <div class="save-button-container">
+    <button class="btn-save" onclick="saveChartAsImage()">💾 Download Chart</button>
+   
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            chart_title: "กราฟแสดงข้อมูล",
+            indicator_label: "ตัวชี้วัด",
+            target_label: "เป้าหมาย",
+            status_text: "Good",
+            arrow_direction: "up",
+            background_color: "#667eea",
+            surface_color: "#ffffff",
+            text_color: "#2d3748",
+            primary_action_color: "#667eea",
+            secondary_action_color: "#f56565"
+        };
+
+        let categories = [
+            { name: "เป้า", color: "#667eea" },
+            { name: "ผล", color: "#48bb78" }
+        ];
+
+        let chartData = {
+            2566: { "เป้า": 80, "ผล": 85 },
+            2567: { "เป้า": 82, "ผล": 88 },
+            2568: { "เป้า": 85, "ผล": 90 }
+        };
+
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 +
+                (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255))
+                .toString(16).slice(1);
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = '';
+            
+            categories.forEach((cat, index) => {
+                const div = document.createElement('div');
+                div.className = 'category-controls';
+                div.innerHTML = `
+                    <input type="text" value="${cat.name}" onchange="updateCategoryName(${index}, this.value)" placeholder="ชื่อหมวดหมู่">
+                    <div class="color-input-group">
+                        <input type="color" value="${cat.color}" onchange="updateCategoryColor(${index}, this.value)">
+                        <button class="btn btn-danger" onclick="removeCategory(${index})">ลบ</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            renderDataTable();
+            renderChart();
+        }
+
+        function addCategory() {
+            const colors = ["#667eea", "#48bb78", "#ed8936", "#f56565", "#9f7aea"];
+            categories.push({
+                name: `หมวดหมู่ ${categories.length + 1}`,
+                color: colors[categories.length % colors.length]
+            });
+            
+            Object.keys(chartData).forEach(year => {
+                chartData[year][`หมวดหมู่ ${categories.length}`] = 0;
+            });
+            
+            renderCategories();
+            updateStatusBadge(defaultConfig.status_text, defaultConfig.arrow_direction);
+        }
+
+        function removeCategory(index) {
+            const catName = categories[index].name;
+            categories.splice(index, 1);
+            
+            Object.keys(chartData).forEach(year => {
+                delete chartData[year][catName];
+            });
+            
+            renderCategories();
+            updateStatusBadge(defaultConfig.status_text, defaultConfig.arrow_direction);
+        }
+
+        function updateCategoryName(index, newName) {
+            const oldName = categories[index].name;
+            categories[index].name = newName;
+            
+            Object.keys(chartData).forEach(year => {
+                chartData[year][newName] = chartData[year][oldName] || 0;
+                delete chartData[year][oldName];
+            });
+            
+            renderCategories();
+            updateStatusBadge(defaultConfig.status_text, defaultConfig.arrow_direction);
+        }
+
+        function updateCategoryColor(index, newColor) {
+            categories[index].color = newColor;
+            renderChart();
+        }
+
+        function renderDataTable() {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            const years = [
+                document.getElementById('year1').value,
+                document.getElementById('year2').value,
+                document.getElementById('year3').value
+            ];
+
+            document.getElementById('yearHeader1').textContent = years[0];
+            document.getElementById('yearHeader2').textContent = years[1];
+            document.getElementById('yearHeader3').textContent = years[2];
+            
+            categories.forEach(cat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600;">${cat.name}</td>
+                    <td><input type="number" value="${chartData[years[0]][cat.name] || 0}" onchange="updateData('${years[0]}', '${cat.name}', this.value)" step="0.1"></td>
+                    <td><input type="number" value="${chartData[years[1]][cat.name] || 0}" onchange="updateData('${years[1]}', '${cat.name}', this.value)" step="0.1"></td>
+                    <td><input type="number" value="${chartData[years[2]][cat.name] || 0}" onchange="updateData('${years[2]}', '${cat.name}', this.value)" step="0.1"></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateData(year, category, value) {
+            if (!chartData[year]) {
+                chartData[year] = {};
+            }
+            chartData[year][category] = parseFloat(value) || 0;
+            renderChart();
+        }
+
+        function renderChart() {
+            const years = [
+                document.getElementById('year1').value,
+                document.getElementById('year2').value,
+                document.getElementById('year3').value
+            ];
+
+            let maxValue = 100;
+            years.forEach(year => {
+                if (chartData[year]) {
+                    Object.values(chartData[year]).forEach(val => {
+                        maxValue = Math.max(maxValue, val);
+                    });
+                }
+            });
+
+            const targetValue = parseFloat(document.getElementById('targetValue').value) || 0;
+            if (targetValue > 0) {
+                maxValue = Math.max(maxValue, targetValue);
+            }
+
+            maxValue = Math.ceil(maxValue / 10) * 10 + 10;
+
+            const yLabels = document.getElementById('yAxisLabels');
+            yLabels.innerHTML = '';
+            for (let i = 0; i <= 5; i++) {
+                const label = document.createElement('div');
+                label.className = 'y-axis-label';
+                label.textContent = Math.round(maxValue * (5 - i) / 5);
+                yLabels.appendChild(label);
+            }
+
+            const targetLineContainer = document.getElementById('targetLineContainer');
+            targetLineContainer.innerHTML = '';
+            if (targetValue > 0 && targetValue <= maxValue) {
+                const targetPercent = (targetValue / maxValue) * 100;
+                const targetLine = document.createElement('div');
+                targetLine.className = 'target-line-dashed';
+                targetLine.style.bottom = `${targetPercent}%`;
+                
+                const targetValueLabel = document.createElement('div');
+                targetValueLabel.className = 'target-value-label';
+                targetValueLabel.textContent = targetValue % 1 === 0 ? targetValue : targetValue.toFixed(1);
+                targetLine.appendChild(targetValueLabel);
+                
+                targetLineContainer.appendChild(targetLine);
+            }
+
+            const container = document.getElementById('barsContainer');
+            container.innerHTML = '';
+
+            years.forEach(year => {
+                const yearGroup = document.createElement('div');
+                yearGroup.className = 'year-group';
+
+                const barsWrapper = document.createElement('div');
+                barsWrapper.className = 'bars-wrapper';
+
+                categories.forEach(cat => {
+                    const value = chartData[year] ? (chartData[year][cat.name] || 0) : 0;
+                    const heightPercent = (value / maxValue) * 100;
+
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.style.height = `${heightPercent}%`;
+                    bar.style.setProperty('--bar-color', cat.color);
+                    bar.style.setProperty('--bar-color-light', lightenColor(cat.color, 30));
+
+                    const barValue = document.createElement('div');
+                    barValue.className = 'bar-value';
+                    barValue.textContent = value % 1 === 0 ? value : value.toFixed(1);
+                    bar.appendChild(barValue);
+
+                    barsWrapper.appendChild(bar);
+                });
+
+                const xLabel = document.createElement('div');
+                xLabel.className = 'x-axis-label';
+                xLabel.textContent = year;
+
+                yearGroup.appendChild(barsWrapper);
+                yearGroup.appendChild(xLabel);
+                container.appendChild(yearGroup);
+            });
+
+            const legend = document.getElementById('legend');
+            legend.innerHTML = '';
+            categories.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${cat.color};"></div>
+                    <div class="legend-text">${cat.name}</div>
+                `;
+                legend.appendChild(item);
+            });
+        }
+
+        function updateYears() {
+            const year1 = document.getElementById('year1').value;
+            const year2 = document.getElementById('year2').value;
+            const year3 = document.getElementById('year3').value;
+
+            const newData = {};
+            newData[year1] = chartData[Object.keys(chartData)[0]] || {};
+            newData[year2] = chartData[Object.keys(chartData)[1]] || {};
+            newData[year3] = chartData[Object.keys(chartData)[2]] || {};
+
+            chartData = newData;
+            renderDataTable();
+            renderChart();
+        }
+
+        document.getElementById('year1').addEventListener('change', updateYears);
+        document.getElementById('year2').addEventListener('change', updateYears);
+        document.getElementById('year3').addEventListener('change', updateYears);
+        document.getElementById('targetValue').addEventListener('input', renderChart);
+
+        document.getElementById('titleInput').addEventListener('input', function() {
+            const value = this.value || defaultConfig.chart_title;
+            document.getElementById('displayTitle').textContent = value;
+            if (window.elementSdk) {
+                window.elementSdk.setConfig({ chart_title: value });
+            }
+        });
+
+        document.getElementById('indicatorInput').addEventListener('input', function() {
+            const value = this.value || defaultConfig.indicator_label;
+            document.getElementById('displayIndicator').textContent = value;
+            if (window.elementSdk) {
+                window.elementSdk.setConfig({ indicator_label: value });
+            }
+        });
+
+        document.getElementById('targetInput').addEventListener('input', function() {
+            const value = this.value || defaultConfig.target_label;
+            document.getElementById('displayTarget').textContent = value;
+            if (window.elementSdk) {
+                window.elementSdk.setConfig({ target_label: value });
+            }
+        });
+
+        document.getElementById('statusInput').addEventListener('input', function() {
+            const value = this.value || defaultConfig.status_text;
+            updateStatusBadge(value, document.getElementById('arrowDirection').value);
+            if (window.elementSdk) {
+                window.elementSdk.setConfig({ status_text: value });
+            }
+        });
+
+        function updateArrowDirection() {
+            const direction = document.getElementById('arrowDirection').value;
+            const statusText = document.getElementById('statusInput').value || defaultConfig.status_text;
+            updateStatusBadge(statusText, direction);
+            if (window.elementSdk) {
+                window.elementSdk.setConfig({ arrow_direction: direction });
+            }
+        }
+
+        function updateStatusBadge(text, direction) {
+            const badge = document.getElementById('statusBadge');
+            const arrow = direction === 'up' ? '↑' : '↓';
+            
+            badge.innerHTML = `<span class="status-arrow">${arrow}</span><span>${text}</span>`;
+            
+            badge.classList.remove('arrow-up', 'arrow-down');
+            badge.classList.add(direction === 'up' ? 'arrow-up' : 'arrow-down');
+        }
+
+        async function onConfigChange(config) {
+            const title = config.chart_title || defaultConfig.chart_title;
+            const indicator = config.indicator_label || defaultConfig.indicator_label;
+            const target = config.target_label || defaultConfig.target_label;
+            const status = config.status_text || defaultConfig.status_text;
+            const arrowDir = config.arrow_direction || defaultConfig.arrow_direction;
+            const bgColor = config.background_color || defaultConfig.background_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+
+            document.getElementById('displayTitle').textContent = title;
+            document.getElementById('displayIndicator').textContent = indicator;
+            document.getElementById('displayTarget').textContent = target;
+            updateStatusBadge(status, arrowDir);
+            document.getElementById('titleInput').value = title;
+            document.getElementById('indicatorInput').value = indicator;
+            document.getElementById('targetInput').value = target;
+            document.getElementById('statusInput').value = status;
+            document.getElementById('arrowDirection').value = arrowDir;
+
+            document.body.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${lightenColor(bgColor, -20)} 100%)`;
+            document.querySelector('.chart-title').style.color = '#ffffff';
+            
+            const buttons = document.querySelectorAll('.btn-primary');
+            buttons.forEach(btn => {
+                btn.style.backgroundColor = primaryColor;
+            });
+        }
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig: defaultConfig,
+                onConfigChange: onConfigChange,
+                mapToCapabilities: (config) => ({
+                    recolorables: [
+                        {
+                            get: () => config.background_color || defaultConfig.background_color,
+                            set: (value) => {
+                                config.background_color = value;
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.text_color || defaultConfig.text_color,
+                            set: (value) => {
+                                config.text_color = value;
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                            set: (value) => {
+                                config.primary_action_color = value;
+                                window.elementSdk.setConfig({ primary_action_color: value });
+                            }
+                        }
+                    ],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["chart_title", config.chart_title || defaultConfig.chart_title],
+                    ["indicator_label", config.indicator_label || defaultConfig.indicator_label],
+                    ["target_label", config.target_label || defaultConfig.target_label],
+                    ["status_text", config.status_text || defaultConfig.status_text]
+                ])
+            });
+        }
+
+        // ฟังก์ชัน alternative สำหรับบันทึกภาพ
+        async function saveChartAsImageAlternative(chartContainer, filename) {
+            return new Promise((resolve, reject) => {
+                // ลองใช้ canvas 2D context โดยตรง
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // ตั้งขนาด canvas
+                canvas.width = chartContainer.offsetWidth * 2;
+                canvas.height = chartContainer.offsetHeight * 2;
+                
+                // เติมพื้นหลังสีขาว
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // สร้าง data URL จาก HTML โดยใช้ foreignObject ใน SVG
+                const data = `
+                <svg width="${canvas.width}" height="${canvas.height}" xmlns="http://www.w3.org/2000/svg">
+                    <foreignObject width="100%" height="100%">
+                        <div xmlns="http://www.w3.org/1999/xhtml" style="transform: scale(2);">
+                            ${chartContainer.innerHTML}
+                        </div>
+                    </foreignObject>
+                </svg>`;
+                
+                const blob = new Blob([data], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0);
+                    
+                    canvas.toBlob(function(pngBlob) {
+                        if (pngBlob) {
+                            const link = document.createElement('a');
+                            const pngUrl = URL.createObjectURL(pngBlob);
+                            
+                            link.href = pngUrl;
+                            link.download = filename;
+                            link.style.display = 'none';
+                            
+                            document.body.appendChild(link);
+                            link.click();
+                            
+                            setTimeout(() => {
+                                document.body.removeChild(link);
+                                URL.revokeObjectURL(pngUrl);
+                                URL.revokeObjectURL(url);
+                            }, 100);
+                            
+                            resolve();
+                        } else {
+                            reject(new Error('ไม่สามารถสร้าง PNG blob ได้'));
+                        }
+                    }, 'image/png');
+                };
+                
+                img.onerror = function() {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('ไม่สามารถโหลดภาพจาก SVG ได้'));
+                };
+                
+                img.src = url;
+            });
+        }
+
+        // ฟังก์ชันตรวจสอบว่ามีกราฟหรือไม่
+        function hasChartContent() {
+            const chartContainer = document.getElementById('chartContainer');
+            const barElements = chartContainer.querySelectorAll('.bar, .category');
+            return barElements.length > 0 && chartContainer.offsetHeight > 100;
+        }
+
+        // ฟังก์ชันดาวน์โหลดภาพที่ปรับปรุงแล้ว
+        async function saveChartAsImage() {
+            const chartContainer = document.getElementById('chartContainer');
+            const button = document.querySelector('.btn-save');
+            
+            // ตรวจสอบว่ามีกราฟหรือไม่ก่อน
+            if (!hasChartContent()) {
+                alert('ไม่พบกราฟในขณะนี้ กรุณาสร้างกราฟก่อนดาวน์โหลด');
+                return;
+            }
+            
+            // แสดงสถานะกำลังประมวลผล
+            const originalText = button.textContent;
+            button.innerHTML = '⏳ กำลังบันทึก...';
+            button.disabled = true;
+            
+            try {
+                // รอให้ทุกอย่างโหลดเสร็จก่อน
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // ตรวจสอบขนาดของ container
+                console.log('Chart container dimensions:', {
+                    width: chartContainer.offsetWidth,
+                    height: chartContainer.offsetHeight,
+                    scrollWidth: chartContainer.scrollWidth,
+                    scrollHeight: chartContainer.scrollHeight
+                });
+                
+                // ตรวจสอบว่า container มีเนื้อหาหรือไม่
+                if (chartContainer.offsetWidth === 0 || chartContainer.offsetHeight === 0) {
+                    throw new Error('Chart container มีขนาดเป็น 0 - กราฟอาจยังไม่ได้สร้างขึ้น');
+                }
+                
+                // สร้างภาพด้วย html2canvas
+                const canvas = await html2canvas(chartContainer, {
+                    scale: 2, // ลดจาก 3 เป็น 2
+                    backgroundColor: '#ffffff',
+                    logging: true, // เปิด logging เพื่อ debug
+                    useCORS: true,
+                    allowTaint: true, // เปลี่ยนเป็น true
+                    foreignObjectRendering: false, // เปลี่ยนเป็น false
+                    imageTimeout: 15000,
+                    removeContainer: false, // เปลี่ยนเป็น false
+                    width: chartContainer.scrollWidth || chartContainer.offsetWidth,
+                    height: chartContainer.scrollHeight || chartContainer.offsetHeight,
+                    x: 0,
+                    y: 0
+                });
+                
+                // ตรวจสอบ canvas ที่สร้างขึ้น
+                console.log('Canvas created:', {
+                    width: canvas.width,
+                    height: canvas.height,
+                    hasData: canvas.width > 0 && canvas.height > 0
+                });
+                
+                // ตรวจสอบว่า canvas มีเนื้อหาหรือไม่
+                if (canvas.width === 0 || canvas.height === 0) {
+                    throw new Error('Canvas มีขนาดเป็น 0 - ไม่สามารถสร้างภาพได้');
+                }
+                
+                // สร้างชื่อไฟล์ที่มีวันที่และเวลา
+                const now = new Date();
+                const timestamp = now.toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).replace(/[\/\s:]/g, '-');
+                
+                const chartTitle = document.getElementById('displayTitle').textContent || 'chart';
+                const filename = `${chartTitle}-${timestamp}.png`;
+                
+                // แปลง canvas เป็น blob และดาวน์โหลด
+                canvas.toBlob(function(blob) {
+                    console.log('Blob created:', {
+                        size: blob ? blob.size : 0,
+                        type: blob ? blob.type : 'null'
+                    });
+                    if (blob) {
+                        // สร้างลิงก์สำหรับดาวน์โหลด
+                        const link = document.createElement('a');
+                        const url = URL.createObjectURL(blob);
+                        
+                        link.href = url;
+                        link.download = filename;
+                        link.style.display = 'none';
+                        
+                        // เพิ่มลิงก์เข้าไปในเอกสารและคลิก
+                        document.body.appendChild(link);
+                        link.click();
+                        
+                        // ล้างข้อมูลและลบลิงก์
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                        }, 100);
+                        
+                        // แสดงสถานะสำเร็จ
+                        button.innerHTML = '✅ บันทึกสำเร็จ!';
+                        button.style.backgroundColor = '#48bb78';
+                    } else {
+                        throw new Error('ไม่สามารถสร้างไฟล์ภาพได้');
+                    }
+                }, 'image/png', 1.0); // คุณภาพสูงสุด
+                
+            } catch (error) {
+                console.error('เกิดข้อผิดพลาดในการบันทึกภาพ:', error);
+                
+                // ลองวิธีอื่นถ้า html2canvas ล้มเหลว
+                try {
+                    console.log('กำลังลองวิธี alternative...');
+                    await saveChartAsImageAlternative(chartContainer, filename);
+                    button.innerHTML = '✅ บันทึกสำเร็จ!';
+                    button.style.backgroundColor = '#48bb78';
+                } catch (alternativeError) {
+                    console.error('วิธี alternative ก็ล้มเหลว:', alternativeError);
+                    button.innerHTML = '❌ เกิดข้อผิดพลาด';
+                    button.style.backgroundColor = '#f56565';
+                    
+                    // แสดง alert เพื่อแจ้งผู้ใช้พร้อมข้อมูล debug
+                    alert(`เกิดข้อผิดพลาดในการบันทึกภาพ:\n${error.message}\n\nกรุณาตรวจสอบ Developer Console (F12) เพื่อดูรายละเอียด`);
+                }
+            } finally {
+                // คืนค่าปุ่มเป็นปกติหลังจาก 3 วินาที
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    button.style.backgroundColor = '#48bb78';
+                }, 3000);
+            }
+        }
+
+        renderCategories();
+        updateStatusBadge(defaultConfig.status_text, defaultConfig.arrow_direction);
+    </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1f7f6f61317335',t:'MTc2MzcyMDg4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
