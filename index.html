@@ -249,14 +249,14 @@
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px; /* ลดช่องว่างให้สมมาตร */
+            gap: 12px; /* เพิ่มช่องว่างให้เหมาะกับขนาดใหญ่ */
             background: #48bb78;
             color: white;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px; /* ขนาดพื้นฐานเดียวกันทั้ง badge */
-            line-height: 1; /* ลดความต่างแนวตั้ง */
+            padding: 16px 30px;
+            border-radius: 28px;
+            font-weight: 700; /* ทำให้หนาชัด */
+            font-size: 22px; /* ขยายขนาดให้อ่านเด่นชัด */
+            line-height: 1;
             white-space: nowrap;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
@@ -267,16 +267,16 @@
         }
 
         .status-arrow {
-            font-size: 14px; /* ให้เท่ากับข้อความ */
-            font-weight: 600;
-            line-height: 1; /* ตรง baseline */
+            font-size: 38px; /* ใหญ่กว่าข้อความเล็กน้อย */
+            font-weight:1000;
+            line-height: 1;
             display: flex;
             align-items: center;
         }
 
         .status-text {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 34px;
+            font-weight: 700;
             line-height: 1;
             display: flex;
             align-items: center;
@@ -1045,6 +1045,161 @@
                     ["status_text", config.status_text || defaultConfig.status_text]
                 ])
             });
+        }
+
+        async function saveChartAsImage() {
+            const chartContainer = document.getElementById('chartContainer');
+            const button = document.querySelector('.btn-save');
+            
+            button.textContent = '⏳ กำลังบันทึก...';
+            button.disabled = true;
+            
+            try {
+                // รอให้ทุกอย่างโหลดเสร็จ
+                await document.fonts.ready;
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // บังคับ re-render elements ก่อน capture
+                chartContainer.style.transform = 'translateZ(0)';
+                await new Promise(resolve => requestAnimationFrame(resolve));
+                
+                // ตรวจสอบว่า status badge มี content หรือไม่
+                const statusBadge = document.getElementById('statusBadge');
+                if (statusBadge && !statusBadge.textContent.trim()) {
+                    console.warn('Status badge is empty, refreshing...');
+                    const direction = document.getElementById('arrowDirection').value;
+                    const statusText = document.getElementById('statusInput').value || defaultConfig.status_text;
+                    updateStatusBadge(statusText, direction);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // คำนวณขนาดที่เหมาะสม
+                const rect = chartContainer.getBoundingClientRect();
+                
+                const canvas = await html2canvas(chartContainer, {
+                    scale: 2, // ลดจาก 3 เป็น 2 เพื่อป้องกันปัญหา memory
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    foreignObjectRendering: false,
+                    removeContainer: false,
+                    imageTimeout: 30000,
+                    width: Math.max(rect.width,1000), // ขนาดขั้นต่ำ
+                    height: Math.max(rect.height, 800),
+                    scrollX: 0,
+                    scrollY: 0,
+                    onclone: function(clonedDoc) {
+                        // ปรับแต่ง cloned document
+                        const clonedContainer = clonedDoc.getElementById('chartContainer');
+                        if (clonedContainer) {
+                            // ให้ขนาดที่แน่นอน
+                            clonedContainer.style.width = Math.max(rect.width, 800) + 'px';
+                            clonedContainer.style.minHeight = Math.max(rect.height, 600) + 'px';
+                            
+                            // บังคับให้ฟอนต์แสดงผลถูกต้อง
+                            clonedContainer.style.fontFamily = "'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+                            
+                            // แก้ไข text rendering สำหรับทุก elements
+                            const allElements = clonedContainer.querySelectorAll('*');
+                            allElements.forEach(el => {
+                                el.style.textRendering = 'optimizeLegibility';
+                                el.style.webkitFontSmoothing = 'antialiased';
+                                el.style.mozOsxFontSmoothing = 'grayscale';
+                            });
+                            
+                            // แก้ไข status badge ให้ตรงกับ original
+                            const statusBadge = clonedContainer.querySelector('#statusBadge');
+                            const originalBadge = document.getElementById('statusBadge');
+                            if (statusBadge && originalBadge) {
+                                // รับข้อมูลจากต้นฉบับ
+                                const direction = document.getElementById('arrowDirection').value;
+                                const statusText = document.getElementById('statusInput').value || defaultConfig.status_text;
+                                const arrow = direction === 'up' ? '↑' : '↓';
+                                const bgColor = direction === 'up' ? '#48bb78' : '#f56565';
+                                
+                                // ได้ค่าตำแหน่งจริงจาก original element
+                                const originalRect = originalBadge.getBoundingClientRect();
+                                const containerRect = document.getElementById('chartContainer').getBoundingClientRect();
+                                
+                                // คำนวณตำแหน่งสัมพัทธ์
+                                const relativeTop = originalRect.top - containerRect.top;
+                                const relativeRight = containerRect.right - originalRect.right;
+                                
+                                // ลบ content เดิมและสร้างใหม่ด้วยคลาสมาตรฐาน
+                                statusBadge.className = originalBadge.className;
+                                statusBadge.innerHTML = `<span class="status-arrow" style="margin-right:6px;">${arrow}</span><span class="status-text">${statusText}</span>`;
+                                
+                                // copy style ทั้งหมดจากต้นฉบับ
+                                const originalStyle = window.getComputedStyle(originalBadge);
+                                statusBadge.style.cssText = `
+                                    position: absolute !important;
+                                    top: ${relativeTop}px !important;
+                                    right: ${relativeRight}px !important;
+                                    display: inline-flex !important;
+                                    align-items: center !important;
+                                    gap: 6px !important;
+                                    background: ${bgColor} !important;
+                                    color: white !important;
+                                    padding: 10px 18px !important;
+                                    border-radius: 20px !important;
+                                    font-weight: 600 !important;
+                                    font-size: 14px !important;
+                                    line-height: 1 !important;
+                                    white-space: nowrap !important;
+                                    visibility: visible !important;
+                                    opacity: 1 !important;
+                                    z-index: 1000 !important;
+                                    font-family: 'Sarabun', sans-serif !important;
+                                `;
+                                
+                                console.log('Status badge cloned with exact positioning:', {
+                                    originalRect,
+                                    relativeTop,
+                                    relativeRight,
+                                    content: statusBadge.textContent
+                                });
+                            }
+                            
+                            // ตรวจสอบให้แน่ใจว่า year labels และ legend แสดงผล
+                            const yearLabels = clonedContainer.querySelector('#yearLabelsExternal');
+                            const legend = clonedContainer.querySelector('#legend');
+                            if (yearLabels) yearLabels.style.display = 'flex';
+                            if (legend) legend.style.display = 'flex';
+                        }
+                    }
+                });
+                
+                // Debug: แสดงข้อมูลการสร้าง canvas
+                console.log('Canvas created successfully:', {
+                    width: canvas.width,
+                    height: canvas.height,
+                    statusBadgeContent: document.getElementById('statusBadge')?.textContent,
+                    originalRect: rect
+                });
+                
+                canvas.toBlob(function(blob) {
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    link.download = `chart-${timestamp}.png`;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    
+                    button.textContent = '✅ บันทึกสำเร็จ!';
+                    setTimeout(() => {
+                        button.textContent = '💾 Download';
+                        button.disabled = false;
+                    }, 2000);
+                });
+                
+            } catch (error) {
+                button.textContent = '❌ เกิดข้อผิดพลาด';
+                setTimeout(() => {
+                    button.textContent = '💾 Download';
+                    button.disabled = false;
+                }, 2000);
+            }
         }
 
         renderCategories();
