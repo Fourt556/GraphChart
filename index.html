@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th">
-<head>
+ <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bar Chart System</title>
@@ -465,8 +465,8 @@
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
-</head>
-<body>
+ </head>
+ <body>
   <div class="container">
    <div class="input-section">
     <div class="input-grid">
@@ -475,10 +475,6 @@
      <div class="input-group"><label>ตัวชี้วัด</label> <input type="text" id="indicatorInput" placeholder="เช่น ร้อยละของบัณฑิตที่มีงานทำ">
      </div>
      <div class="input-group"><label>เป้าหมาย</label> <input type="text" id="targetInput" placeholder="เช่น มากกว่าร้อยละ 75">
-     </div>
-     <div class="input-group"><label>สถานะการประเมินผล</label> <input type="text" id="statusInput" placeholder="เช่น Good, Very Good, Excellent">
-     </div>
-     <div class="input-group"><label>ทิศทางลูกศร</label> <select id="arrowDirection" onchange="updateArrowDirection()"> <option value="up">↑ ชี้ขึ้น (เพิ่มขึ้น)</option> <option value="down">↓ ชี้ลง (ลดลง)</option> </select>
      </div>
     </div>
     <div class="category-section">
@@ -498,18 +494,26 @@
      <div class="category-header">
       กรอกข้อมูล
      </div>
-     <div style="overflow-x: auto;">
-      <table class="data-entry-table" id="dataTable">
-       <thead>
-        <tr>
-         <th>หมวดหมู่</th>
-         <th id="yearHeader1">2566</th>
-         <th id="yearHeader2">2567</th>
-         <th id="yearHeader3">2568</th>
-        </tr>
-       </thead>
-       <tbody id="dataTableBody"></tbody>
-      </table>
+     <div style="display: flex; gap: 0px; align-items: center;">
+      <div style="flex: 1; overflow-x: auto;">
+       <table class="data-entry-table" id="dataTable">
+        <thead>
+         <tr>
+          <th>หมวดหมู่</th>
+          <th id="yearHeader1">2566</th>
+          <th id="yearHeader2">2567</th>
+          <th id="yearHeader3">2568</th>
+         </tr>
+        </thead>
+        <tbody id="dataTableBody"></tbody>
+       </table>
+      </div>
+      <div style="min-width: 220px; display: flex; flex-direction: column; gap: 15px;">
+       <div class="input-group"><label>สถานะการประเมินผล</label> <input type="text" id="statusInput" placeholder="เช่น Good, Very Good, Excellent">
+       </div>
+       <div class="input-group"><label>ทิศทางลูกศร</label> <select id="arrowDirection" onchange="updateArrowDirection()"> <option value="up">↑ ชี้ขึ้น (เพิ่มขึ้น)</option> <option value="down">↓ ชี้ลง (ลดลง)</option> </select>
+       </div>
+      </div>
      </div>
     </div>
     <div class="category-section">
@@ -541,9 +545,7 @@
     </div>
     <div class="legend" id="legend"></div>
    </div>
-   <div class="save-button-container">
-    <button class="btn-save" onclick="saveChartAsImage()">💾 Download Chart</button>
-   
+   <div class="save-button-container"><button class="btn-save" onclick="saveChartAsImage()">💾 Download</button>
    </div>
   </div>
   <script>
@@ -921,216 +923,48 @@
             });
         }
 
-        // ฟังก์ชัน alternative สำหรับบันทึกภาพ
-        async function saveChartAsImageAlternative(chartContainer, filename) {
-            return new Promise((resolve, reject) => {
-                // ลองใช้ canvas 2D context โดยตรง
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // ตั้งขนาด canvas
-                canvas.width = chartContainer.offsetWidth * 2;
-                canvas.height = chartContainer.offsetHeight * 2;
-                
-                // เติมพื้นหลังสีขาว
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // สร้าง data URL จาก HTML โดยใช้ foreignObject ใน SVG
-                const data = `
-                <svg width="${canvas.width}" height="${canvas.height}" xmlns="http://www.w3.org/2000/svg">
-                    <foreignObject width="100%" height="100%">
-                        <div xmlns="http://www.w3.org/1999/xhtml" style="transform: scale(2);">
-                            ${chartContainer.innerHTML}
-                        </div>
-                    </foreignObject>
-                </svg>`;
-                
-                const blob = new Blob([data], { type: 'image/svg+xml' });
-                const url = URL.createObjectURL(blob);
-                
-                const img = new Image();
-                img.onload = function() {
-                    ctx.drawImage(img, 0, 0);
-                    
-                    canvas.toBlob(function(pngBlob) {
-                        if (pngBlob) {
-                            const link = document.createElement('a');
-                            const pngUrl = URL.createObjectURL(pngBlob);
-                            
-                            link.href = pngUrl;
-                            link.download = filename;
-                            link.style.display = 'none';
-                            
-                            document.body.appendChild(link);
-                            link.click();
-                            
-                            setTimeout(() => {
-                                document.body.removeChild(link);
-                                URL.revokeObjectURL(pngUrl);
-                                URL.revokeObjectURL(url);
-                            }, 100);
-                            
-                            resolve();
-                        } else {
-                            reject(new Error('ไม่สามารถสร้าง PNG blob ได้'));
-                        }
-                    }, 'image/png');
-                };
-                
-                img.onerror = function() {
-                    URL.revokeObjectURL(url);
-                    reject(new Error('ไม่สามารถโหลดภาพจาก SVG ได้'));
-                };
-                
-                img.src = url;
-            });
-        }
-
-        // ฟังก์ชันตรวจสอบว่ามีกราฟหรือไม่
-        function hasChartContent() {
-            const chartContainer = document.getElementById('chartContainer');
-            const barElements = chartContainer.querySelectorAll('.bar, .category');
-            return barElements.length > 0 && chartContainer.offsetHeight > 100;
-        }
-
-        // ฟังก์ชันดาวน์โหลดภาพที่ปรับปรุงแล้ว
         async function saveChartAsImage() {
             const chartContainer = document.getElementById('chartContainer');
             const button = document.querySelector('.btn-save');
             
-            // ตรวจสอบว่ามีกราฟหรือไม่ก่อน
-            if (!hasChartContent()) {
-                alert('ไม่พบกราฟในขณะนี้ กรุณาสร้างกราฟก่อนดาวน์โหลด');
-                return;
-            }
-            
-            // แสดงสถานะกำลังประมวลผล
-            const originalText = button.textContent;
-            button.innerHTML = '⏳ กำลังบันทึก...';
+            button.textContent = '⏳ กำลังบันทึก...';
             button.disabled = true;
             
             try {
-                // รอให้ทุกอย่างโหลดเสร็จก่อน
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // ตรวจสอบขนาดของ container
-                console.log('Chart container dimensions:', {
-                    width: chartContainer.offsetWidth,
-                    height: chartContainer.offsetHeight,
-                    scrollWidth: chartContainer.scrollWidth,
-                    scrollHeight: chartContainer.scrollHeight
-                });
-                
-                // ตรวจสอบว่า container มีเนื้อหาหรือไม่
-                if (chartContainer.offsetWidth === 0 || chartContainer.offsetHeight === 0) {
-                    throw new Error('Chart container มีขนาดเป็น 0 - กราฟอาจยังไม่ได้สร้างขึ้น');
-                }
-                
-                // สร้างภาพด้วย html2canvas
                 const canvas = await html2canvas(chartContainer, {
-                    scale: 2, // ลดจาก 3 เป็น 2
+                    scale: 2,
                     backgroundColor: '#ffffff',
-                    logging: true, // เปิด logging เพื่อ debug
+                    logging: false,
                     useCORS: true,
-                    allowTaint: true, // เปลี่ยนเป็น true
-                    foreignObjectRendering: false, // เปลี่ยนเป็น false
-                    imageTimeout: 15000,
-                    removeContainer: false, // เปลี่ยนเป็น false
-                    width: chartContainer.scrollWidth || chartContainer.offsetWidth,
-                    height: chartContainer.scrollHeight || chartContainer.offsetHeight,
-                    x: 0,
-                    y: 0
+                    allowTaint: true
                 });
                 
-                // ตรวจสอบ canvas ที่สร้างขึ้น
-                console.log('Canvas created:', {
-                    width: canvas.width,
-                    height: canvas.height,
-                    hasData: canvas.width > 0 && canvas.height > 0
-                });
-                
-                // ตรวจสอบว่า canvas มีเนื้อหาหรือไม่
-                if (canvas.width === 0 || canvas.height === 0) {
-                    throw new Error('Canvas มีขนาดเป็น 0 - ไม่สามารถสร้างภาพได้');
-                }
-                
-                // สร้างชื่อไฟล์ที่มีวันที่และเวลา
-                const now = new Date();
-                const timestamp = now.toLocaleString('th-TH', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }).replace(/[\/\s:]/g, '-');
-                
-                const chartTitle = document.getElementById('displayTitle').textContent || 'chart';
-                const filename = `${chartTitle}-${timestamp}.png`;
-                
-                // แปลง canvas เป็น blob และดาวน์โหลด
                 canvas.toBlob(function(blob) {
-                    console.log('Blob created:', {
-                        size: blob ? blob.size : 0,
-                        type: blob ? blob.type : 'null'
-                    });
-                    if (blob) {
-                        // สร้างลิงก์สำหรับดาวน์โหลด
-                        const link = document.createElement('a');
-                        const url = URL.createObjectURL(blob);
-                        
-                        link.href = url;
-                        link.download = filename;
-                        link.style.display = 'none';
-                        
-                        // เพิ่มลิงก์เข้าไปในเอกสารและคลิก
-                        document.body.appendChild(link);
-                        link.click();
-                        
-                        // ล้างข้อมูลและลบลิงก์
-                        setTimeout(() => {
-                            document.body.removeChild(link);
-                            URL.revokeObjectURL(url);
-                        }, 100);
-                        
-                        // แสดงสถานะสำเร็จ
-                        button.innerHTML = '✅ บันทึกสำเร็จ!';
-                        button.style.backgroundColor = '#48bb78';
-                    } else {
-                        throw new Error('ไม่สามารถสร้างไฟล์ภาพได้');
-                    }
-                }, 'image/png', 1.0); // คุณภาพสูงสุด
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    link.download = `chart-${timestamp}.png`;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    
+                    button.textContent = '✅ บันทึกสำเร็จ!';
+                    setTimeout(() => {
+                        button.textContent = '💾 Download';
+                        button.disabled = false;
+                    }, 2000);
+                });
                 
             } catch (error) {
-                console.error('เกิดข้อผิดพลาดในการบันทึกภาพ:', error);
-                
-                // ลองวิธีอื่นถ้า html2canvas ล้มเหลว
-                try {
-                    console.log('กำลังลองวิธี alternative...');
-                    await saveChartAsImageAlternative(chartContainer, filename);
-                    button.innerHTML = '✅ บันทึกสำเร็จ!';
-                    button.style.backgroundColor = '#48bb78';
-                } catch (alternativeError) {
-                    console.error('วิธี alternative ก็ล้มเหลว:', alternativeError);
-                    button.innerHTML = '❌ เกิดข้อผิดพลาด';
-                    button.style.backgroundColor = '#f56565';
-                    
-                    // แสดง alert เพื่อแจ้งผู้ใช้พร้อมข้อมูล debug
-                    alert(`เกิดข้อผิดพลาดในการบันทึกภาพ:\n${error.message}\n\nกรุณาตรวจสอบ Developer Console (F12) เพื่อดูรายละเอียด`);
-                }
-            } finally {
-                // คืนค่าปุ่มเป็นปกติหลังจาก 3 วินาที
+                button.textContent = '❌ เกิดข้อผิดพลาด';
                 setTimeout(() => {
-                    button.innerHTML = originalText;
+                    button.textContent = '💾 Download';
                     button.disabled = false;
-                    button.style.backgroundColor = '#48bb78';
-                }, 3000);
+                }, 2000);
             }
         }
 
         renderCategories();
         updateStatusBadge(defaultConfig.status_text, defaultConfig.arrow_direction);
     </script>
-  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a1f7f6f61317335',t:'MTc2MzcyMDg4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a203ad9f56f9e1e',t:'MTc2MzcyODU1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
