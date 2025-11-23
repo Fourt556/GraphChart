@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bar Chart System</title>
+  <title>BarChartSystem EDU By YAM</title>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
@@ -40,7 +40,7 @@
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
         .chart-title {
@@ -57,7 +57,7 @@
         }
 
         .chart-subtitle {
-            font-size: 16px;
+            font-size: 24px;
             color: #718096;
             margin-top: 10px;
             text-rendering: optimizeLegibility;
@@ -249,13 +249,13 @@
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 12px; /* เพิ่มช่องว่างให้เหมาะกับขนาดใหญ่ */
+            gap: 8px;
             background: #48bb78;
             color: white;
-            padding: 16px 30px;
-            border-radius: 28px;
-            font-weight: 700; /* ทำให้หนาชัด */
-            font-size: 22px; /* ขยายขนาดให้อ่านเด่นชัด */
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 22px;
             line-height: 1;
             white-space: nowrap;
             text-rendering: optimizeLegibility;
@@ -272,6 +272,8 @@
             line-height: 1;
             display: flex;
             align-items: center;
+            text-shadow: 0 0 4px currentColor, 0 0 4px currentColor, 0 0 4px currentColor;
+            -webkit-text-stroke: 4px currentColor;
         }
 
         .status-text {
@@ -292,8 +294,8 @@
 
         .chart-canvas {
             position: relative;
-            height: 450px;
-            margin-top: 40px;
+            height: 350px;
+            margin-top: 15px;
         }
 
         .chart-axes {
@@ -301,24 +303,24 @@
             height: 100%;
             border-left: 3px solid #2d3748;
             border-bottom: 3px solid #2d3748;
-            padding: 20px 20px 40px 60px;
+            padding: 10px 10px 20px 30px;
         }
 
         .y-axis-labels {
             position: absolute;
-            left: 0;
-            top: 20px;
-            bottom: 40px;
+            left: -60px;
+            top: 10px;
+            bottom: 20px;
             width: 50px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: flex-end;
-            padding-right: 10px;
+            padding-right: 5px;
         }
 
         .y-axis-label {
-            font-size: 12px;
+            font-size: 24px;
             color: #4a5568;
             font-weight: 600;
         }
@@ -346,8 +348,9 @@
             align-items: flex-end;
             height: 100%; /* เอา calc(100% - 30px) ออกเพราะไม่ต้อง margin สำหรับ label แล้ว */
             width: 100%;
-            justify-content: center;
+            justify-content: flex-start;
             position: relative;
+            padding-left: 0;
         }
 
         .bar {
@@ -366,16 +369,17 @@
 
         .bar-value {
             position: absolute;
-            top: -25px;
+            top: -30px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 12px;
+            font-size: 24px;
             font-weight: 600;
             color: #2d3748;
             white-space: nowrap;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
             font-family: 'Sarabun', sans-serif;
+            z-index: 11;
         }
 
         .x-axis-label {
@@ -392,12 +396,12 @@
         .year-labels-external {
             display: flex;
             justify-content: space-around;
-            margin-top: 15px;
-            padding: 0 60px 0 60px; /* ให้ตรงกับแท่งกราฟ */
+            margin-top: 5px;
+            padding: 0 10px 0 30px;
         }
         
         .year-label-external {
-            font-size: 16px;
+            font-size: 24px;
             font-weight: 600;
             color: #2d3748;
             text-rendering: optimizeLegibility;
@@ -411,8 +415,8 @@
             display: flex;
             justify-content: center;
             gap: 30px;
-            margin-top: 15px;
-            margin-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 15px;
             flex-wrap: wrap;
             padding: 0 20px;
         }
@@ -430,7 +434,7 @@
         }
 
         .legend-text {
-            font-size: 14px;
+            font-size: 24px;
             color: #4a5568;
             font-weight: 600;
             text-rendering: optimizeLegibility;
@@ -461,6 +465,7 @@
             font-weight: bold;
             white-space: nowrap;
             box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
+            display: none;
         }
 
         .target-value-label {
@@ -471,7 +476,7 @@
             color: white;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 32x;
             font-weight: bold;
             white-space: nowrap;
             box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
@@ -578,6 +583,7 @@
       </div>
      </div>
     </div>
+    <div class="legend" id="legend"></div>
     <div class="chart-canvas">
      <div class="chart-axes">
       <div class="y-axis-labels" id="yAxisLabels"></div>
@@ -586,7 +592,6 @@
      </div>
     </div>
     <div class="year-labels-external" id="yearLabelsExternal"></div>
-    <div class="legend" id="legend"></div>
    </div>
   </div>
   <script>
@@ -604,14 +609,14 @@
         };
 
         let categories = [
-            { name: "เป้า", color: "#667eea" },
-            { name: "ผล", color: "#48bb78" }
+            { name: "เป้า", color: "#1e40af" },
+            { name: "ผล", color: "#fbbf24" }
         ];
 
         let chartData = {
-            2566: { "เป้า": 80, "ผล": 85 },
-            2567: { "เป้า": 82, "ผล": 88 },
-            2568: { "เป้า": 85, "ผล": 90 }
+            2566: { "เป้า": 0, "ผล": 0 },
+            2567: { "เป้า": 0, "ผล": 0 },
+            2568: { "เป้า": 0, "ผล": 0 }
         };
 
         function lightenColor(color, percent) {
@@ -648,13 +653,16 @@
 
         function addCategory() {
             const colors = ["#667eea", "#48bb78", "#ed8936", "#f56565", "#9f7aea"];
+            const categoryNumber = categories.length + 1;
+            const categoryName = categoryNumber === 3 ? "คู่เทียบ" : `หมวดหมู่ ${categoryNumber}`;
+            
             categories.push({
-                name: `หมวดหมู่ ${categories.length + 1}`,
+                name: categoryName,
                 color: colors[categories.length % colors.length]
             });
             
             Object.keys(chartData).forEach(year => {
-                chartData[year][`หมวดหมู่ ${categories.length}`] = 0;
+                chartData[year][categoryName] = 0;
             });
             
             renderCategories();
@@ -707,11 +715,14 @@
             
             categories.forEach(cat => {
                 const row = document.createElement('tr');
+                const val0 = chartData[years[0]][cat.name] || 0;
+                const val1 = chartData[years[1]][cat.name] || 0;
+                const val2 = chartData[years[2]][cat.name] || 0;
                 row.innerHTML = `
                     <td style="font-weight: 600;">${cat.name}</td>
-                    <td><input type="number" value="${chartData[years[0]][cat.name] || 0}" onchange="updateData('${years[0]}', '${cat.name}', this.value)" step="0.1"></td>
-                    <td><input type="number" value="${chartData[years[1]][cat.name] || 0}" onchange="updateData('${years[1]}', '${cat.name}', this.value)" step="0.1"></td>
-                    <td><input type="number" value="${chartData[years[2]][cat.name] || 0}" onchange="updateData('${years[2]}', '${cat.name}', this.value)" step="0.1"></td>
+                    <td><input type="number" value="${val0 === 0 ? '' : val0}" placeholder="0" onchange="updateData('${years[0]}', '${cat.name}', this.value)" step="0.1"></td>
+                    <td><input type="number" value="${val1 === 0 ? '' : val1}" placeholder="0" onchange="updateData('${years[1]}', '${cat.name}', this.value)" step="0.1"></td>
+                    <td><input type="number" value="${val2 === 0 ? '' : val2}" placeholder="0" onchange="updateData('${years[2]}', '${cat.name}', this.value)" step="0.1"></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -787,64 +798,24 @@
             const container = document.getElementById('barsContainer');
             container.innerHTML = '';
 
-            // เพิ่มเส้นเป้าหมายในพื้นที่เดียวกันกับแท่งกราฟ
-            if (targetValue > 0 && targetValue <= maxValue) {
-                const targetPercent = (targetValue / maxValue) * 100;
-                const targetLine = document.createElement('div');
-                targetLine.style.cssText = `
-                    position: absolute;
-                    left: 0;
-                    right: 0;
-                    bottom: ${targetPercent}%;
-                    height: 3px;
-                    background: #ed8936;
-                    z-index: 10;
-                    pointer-events: none;
-                `;
-                
-                const targetValueLabel = document.createElement('div');
-                targetValueLabel.style.cssText = `
-                    position: absolute;
-                    right: -60px;
-                    top: -10px;
-                    background: #ed8936;
-                    color: white;
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    font-size: 13px;
-                    font-weight: bold;
-                    white-space: nowrap;
-                    box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
-                `;
-                targetValueLabel.textContent = targetValue % 1 === 0 ? targetValue : targetValue.toFixed(1);
-                targetLine.appendChild(targetValueLabel);
-                
-                const targetLabel = document.createElement('div');
-                targetLabel.style.cssText = `
-                    position: absolute;
-                    left: 0;
-                    top: -25px;
-                    background: #ed8936;
-                    color: white;
-                    padding: 4px 12px;
-                    border-radius: 6px;
-                    font-size: 12px;
-                    font-weight: bold;
-                    white-space: nowrap;
-                    box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
-                `;
-                targetLabel.textContent = 'เป้าหมาย';
-                targetLine.appendChild(targetLabel);
-                
-                container.appendChild(targetLine);
-            }
-
-            years.forEach(year => {
+            years.forEach((year, yearIndex) => {
                 const yearGroup = document.createElement('div');
                 yearGroup.className = 'year-group';
 
                 const barsWrapper = document.createElement('div');
                 barsWrapper.className = 'bars-wrapper';
+
+                // คำนวณค่าเฉลี่ยของแต่ละปี (ยกเว้นหมวดหมู่ที่ 3)
+                let yearTotal = 0;
+                let categoryCount = 0;
+                categories.forEach((cat, index) => {
+                    if (index < 2) { // นับเฉพาะ 2 หมวดหมู่แรก
+                        const value = chartData[year] ? (chartData[year][cat.name] || 0) : 0;
+                        yearTotal += value;
+                        categoryCount++;
+                    }
+                });
+                const yearAverage = categoryCount > 0 ? yearTotal / categoryCount : 0;
 
                 categories.forEach(cat => {
                     const value = chartData[year] ? (chartData[year][cat.name] || 0) : 0;
@@ -863,6 +834,83 @@
 
                     barsWrapper.appendChild(bar);
                 });
+
+                // เพิ่มเส้นเป้าหมายแยกในแต่ละปี
+                if (targetValue > 0 && targetValue <= maxValue) {
+                    const targetPercent = (targetValue / maxValue) * 100;
+                    const averagePercent = (yearAverage / maxValue) * 100;
+                    
+                    // เส้นเป้าหมายสีแดง
+                    const targetLineInYear = document.createElement('div');
+                    targetLineInYear.style.cssText = `
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                        bottom: ${targetPercent}%;
+                        height: 3px;
+                        background: #dc2626;
+                        z-index: 10;
+                        pointer-events: none;
+                    `;
+                    
+                    // แสดงค่าเป้าหมายเฉพาะปีสุดท้าย (2568)
+                    if (yearIndex === years.length - 1) {
+                        const targetValueLabel = document.createElement('div');
+                        targetValueLabel.style.cssText = `
+                            position: absolute;
+                            right: -50px;
+                            top: -15px;
+                            background: #dc2626;
+                            color: white;
+                            padding: 6px 14px;
+                            border-radius: 8px;
+                            font-size: 27px;
+                            font-weight: bold;
+                            white-space: nowrap;
+                            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+                        `;
+                        targetValueLabel.textContent = targetValue % 1 === 0 ? targetValue : targetValue.toFixed(1);
+                        targetLineInYear.appendChild(targetValueLabel);
+                    }
+                    
+                    barsWrapper.appendChild(targetLineInYear);
+                    
+                    // คำนวณตำแหน่งคงที่ระหว่างแท่งเป้ากับผล
+                    const barWidth = 50;
+                    const barGap = 8;
+                    const fixedPosition = barWidth + (barGap / 2); // ตำแหน่งกึ่งกลางระหว่างแท่งที่ 1 และ 2
+                    
+                    // สร้างเส้นเชื่อม
+                    const comparisonLine = document.createElement('div');
+                    comparisonLine.style.cssText = `
+                        position: absolute;
+                        left: ${fixedPosition}px;
+                        bottom: ${Math.min(targetPercent, averagePercent)}%;
+                        height: ${Math.abs(targetPercent - averagePercent)}%;
+                        width: 3px;
+                        background: ${averagePercent >= targetPercent ? '#48bb78' : '#f56565'};
+                        z-index: 8;
+                        opacity: 0.7;
+                    `;
+                    
+                    // เพิ่มจุดที่ตำแหน่งค่าเฉลี่ย
+                    const averageDot = document.createElement('div');
+                    averageDot.style.cssText = `
+                        position: absolute;
+                        left: ${fixedPosition - 6}px;
+                        bottom: ${averagePercent}%;
+                        width: 12px;
+                        height: 12px;
+                        background: ${averagePercent >= targetPercent ? '#48bb78' : '#f56565'};
+                        border: 2px solid white;
+                        border-radius: 50%;
+                        z-index: 9;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    `;
+                    
+                    barsWrapper.appendChild(comparisonLine);
+                    barsWrapper.appendChild(averageDot);
+                }
 
                 yearGroup.appendChild(barsWrapper);
                 container.appendChild(yearGroup);
@@ -889,6 +937,17 @@
                 `;
                 legend.appendChild(item);
             });
+            
+            // เพิ่มเป้าหมายใน legend
+            if (targetValue > 0) {
+                const targetItem = document.createElement('div');
+                targetItem.className = 'legend-item';
+                targetItem.innerHTML = `
+                    <div class="legend-color" style="background: #dc2626; height: 3px; width: 30px; border-radius: 0;"></div>
+                    <div class="legend-text">เป้าหมาย</div>
+                `;
+                legend.appendChild(targetItem);
+            }
         }
 
         function updateYears() {
