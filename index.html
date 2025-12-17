@@ -748,8 +748,8 @@
                 const label = document.createElement('div');
                 label.className = 'y-axis-label';
                 const labelValue = maxValue * (5 - i) / 5;
-                // แสดงทศนิยม 2 ตำแหน่ง เสมอ
-                label.textContent = Number(labelValue).toFixed(2);
+                // แสดงเป็นจำนวนเต็ม (ไม่มีทศนิยม)
+                label.textContent = Math.round(labelValue).toString();
                 yLabels.appendChild(label);
             }
 
@@ -822,8 +822,8 @@
                             white-space: nowrap;
                             box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
                         `;
-                        // แสดงทศนิยม 2 ตำแหน่ง เสมอ
-                        targetValueLabel.textContent = Number(targetValue).toFixed(2);
+                        // แสดงเป็นจำนวนเต็ม (ไม่มีทศนิยม)
+                        targetValueLabel.textContent = Math.round(Number(targetValue)).toString();
                         targetLineInYear.appendChild(targetValueLabel);
                     }
                     
